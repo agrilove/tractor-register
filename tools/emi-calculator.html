@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tractor Loan EMI Calculator (with SMAM Subsidy) | Tractor Register India</title>
+<meta name="description" content="Calculate your tractor loan EMI in India, including the effect of SMAM subsidy on your loan amount. See monthly EMI, total interest, and full repayment schedule.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+  .calc-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  @media (max-width: 800px) {
+    .calc-wrap { grid-template-columns: 1fr; }
+  }
+  .calc-panel {
+    background: var(--white);
+    border: 1px solid var(--earth-brown);
+    border-radius: 3px;
+    padding: 1.6rem;
+  }
+  .calc-panel h3 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    color: var(--rust-dark);
+    margin-bottom: 1.3rem;
+  }
+  .field-group { margin-bottom: 1.4rem; }
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .field-label .field-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--field-green);
+    font-size: 0.95rem;
+  }
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--plate-bg);
+    outline: none;
+    -webkit-appearance: none;
+    accent-color: var(--rust);
+    border: 1px solid var(--earth-brown);
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--rust);
+    border: 2px solid var(--field-green);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--rust);
+    border: 2px solid var(--field-green);
+    cursor: pointer;
+  }
+  .field-number {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    border: 1.5px solid var(--earth-brown);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    background: var(--page-cream);
+    color: var(--ink);
+  }
+  .field-number:focus { outline: 2px solid var(--rust); }
+  .subsidy-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+    padding: 0.8rem;
+    background: var(--plate-bg);
+    border-radius: 2px;
+    border: 1px solid var(--earth-brown);
+  }
+  .subsidy-toggle input { width: 18px; height: 18px; accent-color: var(--rust); }
+  .subsidy-toggle label { font-size: 0.85rem; font-weight: 600; color: var(--ink); cursor: pointer; }
+  .subsidy-pct-row { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.8rem; }
+  .subsidy-pct-row select {
+    font-family: var(--font-mono);
+    padding: 0.4rem 0.6rem;
+    border: 1.5px solid var(--earth-brown);
+    border-radius: 2px;
+    background: var(--white);
+  }
+  .result-dataplate { margin-top: 0; }
+  .big-result {
+    text-align: center;
+    padding: 1.6rem 1rem;
+    background: var(--field-green);
+    color: var(--page-cream);
+    border-radius: 2px;
+    margin-bottom: 1.2rem;
+  }
+  .big-result .br-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #B9C2AE;
+  }
+  .big-result .br-value {
+    font-family: var(--font-mono);
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--page-cream);
+    margin: 0.3rem 0;
+  }
+  .big-result .br-sub { font-size: 0.8rem; color: #B9C2AE; }
+  .mini-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+  .mini-stat {
+    background: var(--plate-bg);
+    border: 1px solid var(--earth-brown);
+    border-radius: 2px;
+    padding: 0.8rem 1rem;
+  }
+  .mini-stat .ms-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .mini-stat .ms-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--field-green);
+  }
+  .subsidy-note {
+    background: rgba(199,93,44,0.1);
+    border: 1px solid var(--rust);
+    border-radius: 2px;
+    padding: 0.8rem 1rem;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin-bottom: 1.2rem;
+  }
+  .subsidy-note strong { color: var(--rust-dark); }
+  details.amort-toggle {
+    margin-top: 1rem;
+    border: 1px solid var(--earth-brown);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  details.amort-toggle summary {
+    cursor: pointer;
+    padding: 0.7rem 1rem;
+    background: var(--plate-bg);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--field-green);
+    font-weight: 600;
+  }
+  .amort-table-wrap { max-height: 320px; overflow-y: auto; }
+  table.amort-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  table.amort-table th, table.amort-table td {
+    padding: 0.4rem 0.6rem;
+    text-align: right;
+    border-bottom: 1px solid var(--earth-brown);
+    font-family: var(--font-mono);
+  }
+  table.amort-table th {
+    text-align: right;
+    background: var(--field-green);
+    color: var(--page-cream);
+    position: sticky;
+    top: 0;
+  }
+  table.amort-table td:first-child, table.amort-table th:first-child { text-align: left; }
+  .bank-compare-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+  .bank-compare-table th, .bank-compare-table td {
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid var(--earth-brown);
+    text-align: left;
+  }
+  .bank-compare-table th {
+    background: var(--plate-bg);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+  }
+  .bank-compare-table td:nth-child(2), .bank-compare-table th:nth-child(2) { font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="brand-mark">Tractor<span>Register</span>India</div>
+      <span class="brand-tag">Specs · Prices · Buying Guides</span>
+    </div>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../tractors/index.html">Tractors</a></li>
+        <li><a href="../implements/index.html">Implements</a></li>
+        <li><a href="../articles/index.html">Articles</a></li>
+        <li><a href="index.html">Tools</a></li>
+        <li><a href="../legal/about.html">About</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="container" style="padding-top:2rem;">
+  <p class="breadcrumb"><a href="../index.html">Home</a> / <a href="index.html">Tools</a> / EMI Calculator</p>
+
+  <span class="section-label">Free tool · Updated June 2026</span>
+  <h1>Tractor Loan EMI Calculator</h1>
+  <p style="max-width:65ch; color:var(--ink-soft); font-size:1.05rem;">
+    Work out your monthly EMI for a tractor or implement loan — and see exactly how much a SMAM subsidy reduces your payments. No generic EMI calculator does the subsidy math for you; this one does.
+  </p>
+
+  <div class="calc-wrap">
+    <div class="calc-panel">
+      <h3>Loan Details</h3>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Tractor / Implement Price</span>
+          <span class="field-value">₹<span id="priceDisplay">700000</span></span>
+        </div>
+        <input type="range" id="priceSlider" min="150000" max="2000000" step="10000" value="700000">
+        <input type="number" id="priceInput" class="field-number" value="700000" min="50000" max="5000000" step="1000">
+      </div>
+
+      <div class="subsidy-toggle">
+        <input type="checkbox" id="subsidyCheck">
+        <label for="subsidyCheck">Apply SMAM / state subsidy to reduce loan principal</label>
+      </div>
+      <div id="subsidyOptions" style="display:none; margin-bottom:1.4rem;">
+        <div class="subsidy-pct-row">
+          <label for="subsidyPct" style="font-size:0.85rem; font-weight:600;">Subsidy %</label>
+          <select id="subsidyPct">
+            <option value="20">20% (general, common state top-up)</option>
+            <option value="40" selected>40% (SMAM general category)</option>
+            <option value="50">50% (SC/ST / women farmer category, varies by state)</option>
+            <option value="80">80% (Custom Hiring Centre / FMB)</option>
+          </select>
+        </div>
+        <p style="font-size:0.78rem; color:var(--ink-soft); margin:0.6rem 0 0;">Subsidy rates vary by state and category — see our <a href="../articles/tractor-subsidy-schemes.html">subsidy schemes guide</a>. This reduces the amount you need to finance, not your EMI rate.</p>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Down Payment</span>
+          <span class="field-value">₹<span id="downDisplay">140000</span> <span id="downPctDisplay" style="color:var(--ink-soft); font-weight:500;">(20%)</span></span>
+        </div>
+        <input type="range" id="downSlider" min="0" max="100" step="1" value="20">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Interest Rate (per annum)</span>
+          <span class="field-value"><span id="rateDisplay">10.0</span>%</span>
+        </div>
+        <input type="range" id="rateSlider" min="7" max="20" step="0.1" value="10">
+        <p style="font-size:0.78rem; color:var(--ink-soft); margin:0.4rem 0 0;">Public banks (SBI, PNB) typically run 9–11.5%; NBFCs like Mahindra Finance run 9.25–18.5% depending on profile.</p>
+      </div>
+
+      <div class="field-group" style="margin-bottom:0;">
+        <div class="field-label">
+          <span>Loan Tenure</span>
+          <span class="field-value"><span id="tenureDisplay">5</span> years</span>
+        </div>
+        <input type="range" id="tenureSlider" min="1" max="7" step="1" value="5">
+      </div>
+    </div>
+
+    <div class="calc-panel result-dataplate">
+      <h3>Your EMI</h3>
+
+      <div class="big-result">
+        <div class="br-label">Monthly EMI</div>
+        <div class="br-value">₹<span id="emiResult">0</span></div>
+        <div class="br-sub" id="emiNoteResult"></div>
+      </div>
+
+      <div id="subsidySavingsNote" class="subsidy-note" style="display:none;"></div>
+
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <span class="ms-label">Loan Amount</span>
+          <span class="ms-value" id="loanAmountResult">₹0</span>
+        </div>
+        <div class="mini-stat">
+          <span class="ms-label">Total Interest</span>
+          <span class="ms-value" id="totalInterestResult">₹0</span>
+        </div>
+        <div class="mini-stat">
+          <span class="ms-label">Total Repayment</span>
+          <span class="ms-value" id="totalPayableResult">₹0</span>
+        </div>
+        <div class="mini-stat">
+          <span class="ms-label">Number of EMIs</span>
+          <span class="ms-value" id="numEmiResult">0</span>
+        </div>
+      </div>
+
+      <details class="amort-toggle">
+        <summary>View year-by-year repayment schedule</summary>
+        <div class="amort-table-wrap">
+          <table class="amort-table">
+            <thead>
+              <tr><th>Year</th><th>Principal Paid</th><th>Interest Paid</th><th>Balance Remaining</th></tr>
+            </thead>
+            <tbody id="amortBody"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <h2>How tractor loan EMI is calculated</h2>
+  <p style="color:var(--ink-soft); max-width:70ch;">
+    EMI is calculated on the reducing balance method, the standard used by Indian banks and NBFCs for tractor loans: <strong>EMI = P × R × (1+R)<sup>N</sup> ÷ [(1+R)<sup>N</sup> − 1]</strong>, where P is the loan principal, R is the monthly interest rate (annual rate ÷ 12), and N is the number of monthly installments. If a SMAM subsidy applies, it reduces P directly — it does not change your interest rate, but a smaller loan amount means a smaller EMI and far less interest paid over the loan's life.
+  </p>
+
+  <h2>Typical tractor loan interest rates by lender (2026)</h2>
+  <table class="bank-compare-table">
+    <tr><th>Lender</th><th>Rate range (p.a.)</th><th>Typical tenure</th><th>Funding</th></tr>
+    <tr><td>State Bank of India (SBI)</td><td>9.0% – 11.5%</td><td>Up to 7 years</td><td>Up to 100% in select schemes</td></tr>
+    <tr><td>Punjab National Bank (PNB)</td><td>9.3% and up</td><td>1 – 7 years</td><td>Up to 90%</td></tr>
+    <tr><td>Kotak Mahindra Bank</td><td>9.0% and up</td><td>1 – 7 years</td><td>Up to 90%</td></tr>
+    <tr><td>Mahindra Finance (NBFC)</td><td>9.25% and up</td><td>Up to 7 years</td><td>Up to 90%, faster rural disbursal</td></tr>
+    <tr><td>HDFC Bank</td><td>~12.6% and up</td><td>12 – 84 months</td><td>Up to 90%</td></tr>
+    <tr><td>Axis Bank</td><td>12.0% – 23.9%</td><td>Up to 5–7 years</td><td>Varies by profile</td></tr>
+  </table>
+  <p style="font-size:0.82rem; color:var(--ink-soft);">Public sector banks generally offer lower headline rates; NBFCs often approve faster and fund a higher percentage with simpler documentation. Rates shown are indicative starting rates compiled from lender-published sources as of June 2026 — your actual rate depends on credit profile, land records, and lender promotions at the time of application. Confirm current rates directly with the lender before applying.</p>
+
+  <h2>Why the subsidy toggle matters</h2>
+  <p style="color:var(--ink-soft); max-width:70ch;">
+    Most EMI calculators assume you're financing the full purchase price. But many tractor buyers in India are eligible for a SMAM or state subsidy that's credited against the purchase before the loan is even sanctioned — meaning the loan principal, and therefore the EMI, is calculated on a smaller number than the sticker price. Toggling the subsidy on above shows you the real EMI you'd likely face after subsidy, not the inflated full-price EMI most calculators show. See our <a href="../articles/tractor-subsidy-schemes.html">tractor subsidy schemes guide</a> for eligibility and how to apply.
+  </p>
+
+  <p style="font-size:0.82rem; color:var(--ink-soft); margin-top:1.5rem;">This calculator provides estimates for planning purposes only and is not a loan offer. Actual EMI, interest rate, and approved subsidy amount depend on the lender's assessment, your credit profile, and current scheme rules in your state. See our <a href="../legal/disclaimer.html">full disclaimer</a>.</p>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 Tractor Register India. Independent publication, not affiliated with any manufacturer or lender.</span>
+      <span><a href="../legal/disclaimer.html" style="color:#B9C2AE;">Disclaimer</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  const priceSlider = document.getElementById('priceSlider');
+  const priceInput = document.getElementById('priceInput');
+  const priceDisplay = document.getElementById('priceDisplay');
+  const subsidyCheck = document.getElementById('subsidyCheck');
+  const subsidyOptions = document.getElementById('subsidyOptions');
+  const subsidyPct = document.getElementById('subsidyPct');
+  const downSlider = document.getElementById('downSlider');
+  const downDisplay = document.getElementById('downDisplay');
+  const downPctDisplay = document.getElementById('downPctDisplay');
+  const rateSlider = document.getElementById('rateSlider');
+  const rateDisplay = document.getElementById('rateDisplay');
+  const tenureSlider = document.getElementById('tenureSlider');
+  const tenureDisplay = document.getElementById('tenureDisplay');
+
+  function formatINR(num) {
+    num = Math.round(num);
+    return num.toLocaleString('en-IN');
+  }
+
+  function syncPriceFromSlider() {
+    priceInput.value = priceSlider.value;
+    priceDisplay.textContent = formatINR(priceSlider.value);
+  }
+  function syncPriceFromInput() {
+    let v = parseInt(priceInput.value, 10);
+    if (isNaN(v)) v = 0;
+    v = Math.max(50000, Math.min(5000000, v));
+    priceSlider.value = Math.min(2000000, v);
+    priceDisplay.textContent = formatINR(v);
+  }
+
+  function getEffectivePrice() {
+    let price = parseInt(priceInput.value, 10) || 0;
+    if (subsidyCheck.checked) {
+      const pct = parseFloat(subsidyPct.value) / 100;
+      price = price * (1 - pct);
+    }
+    return price;
+  }
+
+  function calculate() {
+    const fullPrice = parseInt(priceInput.value, 10) || 0;
+    const effectivePrice = getEffectivePrice();
+    const downPct = parseInt(downSlider.value, 10) / 100;
+    const downAmt = effectivePrice * downPct;
+    const loanAmount = effectivePrice - downAmt;
+    const annualRate = parseFloat(rateSlider.value);
+    const monthlyRate = annualRate / 12 / 100;
+    const years = parseInt(tenureSlider.value, 10);
+    const numMonths = years * 12;
+
+    downDisplay.textContent = formatINR(downAmt);
+    downPctDisplay.textContent = '(' + downSlider.value + '%)';
+    rateDisplay.textContent = annualRate.toFixed(1);
+    tenureDisplay.textContent = years;
+
+    let emi = 0;
+    if (monthlyRate > 0 && loanAmount > 0) {
+      const factor = Math.pow(1 + monthlyRate, numMonths);
+      emi = loanAmount * monthlyRate * factor / (factor - 1);
+    } else if (loanAmount > 0) {
+      emi = loanAmount / numMonths;
+    }
+
+    const totalPayable = emi * numMonths;
+    const totalInterest = totalPayable - loanAmount;
+
+    document.getElementById('emiResult').textContent = formatINR(emi);
+    document.getElementById('loanAmountResult').textContent = '₹' + formatINR(loanAmount);
+    document.getElementById('totalInterestResult').textContent = '₹' + formatINR(totalInterest);
+    document.getElementById('totalPayableResult').textContent = '₹' + formatINR(totalPayable);
+    document.getElementById('numEmiResult').textContent = numMonths;
+    document.getElementById('emiNoteResult').textContent = 'for ' + numMonths + ' months at ' + annualRate.toFixed(1) + '% p.a.';
+
+    const subsidyNote = document.getElementById('subsidySavingsNote');
+    if (subsidyCheck.checked) {
+      const subsidyAmt = fullPrice - effectivePrice;
+      // compute EMI without subsidy for comparison
+      const loanNoSubsidy = (fullPrice * (1 - downPct));
+      let emiNoSubsidy = 0;
+      if (monthlyRate > 0 && loanNoSubsidy > 0) {
+        const f2 = Math.pow(1 + monthlyRate, numMonths);
+        emiNoSubsidy = loanNoSubsidy * monthlyRate * f2 / (f2 - 1);
+      } else if (loanNoSubsidy > 0) {
+        emiNoSubsidy = loanNoSubsidy / numMonths;
+      }
+      const emiSaved = emiNoSubsidy - emi;
+      subsidyNote.style.display = 'block';
+      subsidyNote.innerHTML = '<strong>Subsidy impact:</strong> ₹' + formatINR(subsidyAmt) + ' subsidy lowers your loan principal, cutting your EMI by roughly ₹' + formatINR(emiSaved) + '/month versus financing the full price (₹' + formatINR(emiNoSubsidy) + ' → ₹' + formatINR(emi) + ').';
+    } else {
+      subsidyNote.style.display = 'none';
+    }
+
+    buildAmortization(loanAmount, monthlyRate, numMonths, annualRate, years);
+  }
+
+  function buildAmortization(loanAmount, monthlyRate, numMonths, annualRate, years) {
+    const tbody = document.getElementById('amortBody');
+    tbody.innerHTML = '';
+    if (loanAmount <= 0) return;
+
+    let balance = loanAmount;
+    let emi = 0;
+    if (monthlyRate > 0) {
+      const factor = Math.pow(1 + monthlyRate, numMonths);
+      emi = loanAmount * monthlyRate * factor / (factor - 1);
+    } else {
+      emi = loanAmount / numMonths;
+    }
+
+    for (let y = 1; y <= years; y++) {
+      let yearPrincipal = 0;
+      let yearInterest = 0;
+      const monthsThisYear = Math.min(12, numMonths - (y - 1) * 12);
+      for (let m = 0; m < monthsThisYear; m++) {
+        const interestPortion = balance * monthlyRate;
+        let principalPortion = emi - interestPortion;
+        if (principalPortion > balance) principalPortion = balance;
+        balance -= principalPortion;
+        yearPrincipal += principalPortion;
+        yearInterest += interestPortion;
+        if (balance <= 0) break;
+      }
+      const row = document.createElement('tr');
+      row.innerHTML = '<td>Year ' + y + '</td><td>₹' + formatINR(yearPrincipal) + '</td><td>₹' + formatINR(yearInterest) + '</td><td>₹' + formatINR(Math.max(0, balance)) + '</td>';
+      tbody.appendChild(row);
+      if (balance <= 0) break;
+    }
+  }
+
+  priceSlider.addEventListener('input', function() { syncPriceFromSlider(); calculate(); });
+  priceInput.addEventListener('input', function() { syncPriceFromInput(); calculate(); });
+  subsidyCheck.addEventListener('change', function() {
+    subsidyOptions.style.display = subsidyCheck.checked ? 'block' : 'none';
+    calculate();
+  });
+  subsidyPct.addEventListener('change', calculate);
+  downSlider.addEventListener('input', calculate);
+  rateSlider.addEventListener('input', calculate);
+  tenureSlider.addEventListener('input', calculate);
+
+  calculate();
+})();
+</script>
+
+</body>
+</html>
